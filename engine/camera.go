@@ -1,7 +1,6 @@
 package engine
 
 import (
-	"encoding/json"
 	"math"
 )
 
@@ -10,36 +9,13 @@ type Camera interface {
 }
 
 type camera struct {
-	origin          Point3
-	lowerLeftCorner Point3
-	horizontal      Vec3
-	vertical        Vec3
-	u, v            Vec3
-	lensRadius      float64
-}
-
-func (c camera) MarshalJSON() ([]byte, error) {
-	type CameraJSON struct {
-		Origin          Point3  `json:"origin"`
-		LowerLeftCorner Point3  `json:"lowerLeftCorner"`
-		Horizontal      Vec3    `json:"horizontal"`
-		Vertical        Vec3    `json:"vertical"`
-		U               Vec3    `json:"u"`
-		V               Vec3    `json:"v"`
-		LensRadius      float64 `json:"lensRadius"`
-	}
-
-	cameraJSON := CameraJSON{
-		Origin:          c.origin,
-		LowerLeftCorner: c.lowerLeftCorner,
-		Horizontal:      c.horizontal,
-		Vertical:        c.vertical,
-		U:               c.u,
-		V:               c.v,
-		LensRadius:      c.lensRadius,
-	}
-
-	return json.Marshal(cameraJSON)
+	Origin          Point3  `json:"origin"`
+	LowerLeftCorner Point3  `json:"lowerLeftCorner"`
+	Horizontal      Vec3    `json:"horizontal"`
+	Vertical        Vec3    `json:"vertical"`
+	U               Vec3    `json:"u"`
+	V               Vec3    `json:"v"`
+	LensRadius      float64 `json:"lensRadius"`
 }
 
 // NewCamera computes the parameters necessary for the camera...
@@ -64,12 +40,12 @@ func NewCamera(lookFrom Point3, lookAt Point3, vup Vec3, vfov float64, aspect fl
 
 // ray implements the main api of the Camera interface according to the book
 func (c camera) ray(rnd Rnd, u, v float64) *Ray {
-	d := c.lowerLeftCorner.Translate(c.horizontal.Scale(u)).Translate(c.vertical.Scale(v)).Sub(c.origin)
-	origin := c.origin
+	d := c.LowerLeftCorner.Translate(c.Horizontal.Scale(u)).Translate(c.Vertical.Scale(v)).Sub(c.Origin)
+	origin := c.Origin
 
-	if c.lensRadius > 0 {
-		rd := RandomInUnitDisk(rnd).Scale(c.lensRadius)
-		offset := c.u.Scale(rd.X).Add(c.v.Scale(rd.Y))
+	if c.LensRadius > 0 {
+		rd := RandomInUnitDisk(rnd).Scale(c.LensRadius)
+		offset := c.U.Scale(rd.X).Add(c.V.Scale(rd.Y))
 		origin = origin.Translate(offset)
 		d = d.Sub(offset)
 	}
