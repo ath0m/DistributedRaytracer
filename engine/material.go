@@ -4,11 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
+
+	clr "github.com/ath0m/DistributedRaytracer/engine/color"
 )
 
 // Material defines how a material scatter light
 type Material interface {
-	scatter(r *Ray, rec *HitRecord) (wasScattered bool, attenuation *Color, scattered *Ray)
+	scatter(r *Ray, rec *HitRecord) (wasScattered bool, attenuation *clr.Color, scattered *Ray)
 }
 
 func UnmarshalMaterial(data json.RawMessage) (Material, error) {
@@ -24,7 +26,7 @@ func UnmarshalMaterial(data json.RawMessage) (Material, error) {
 	switch m.Type {
 	case "Lambertian":
 		var l struct {
-			Albedo Color `json:"albedo"`
+			Albedo clr.Color `json:"albedo"`
 		}
 		err := json.Unmarshal(data, &l)
 		if err != nil {
@@ -34,8 +36,8 @@ func UnmarshalMaterial(data json.RawMessage) (Material, error) {
 
 	case "Metal":
 		var mt struct {
-			Albedo Color   `json:"albedo"`
-			Fuzz   float64 `json:"fuzz"`
+			Albedo clr.Color `json:"albedo"`
+			Fuzz   float64   `json:"fuzz"`
 		}
 		err := json.Unmarshal(data, &mt)
 		if err != nil {
@@ -59,20 +61,20 @@ func UnmarshalMaterial(data json.RawMessage) (Material, error) {
 }
 
 type Lambertian struct {
-	albedo Color
+	albedo clr.Color
 }
 
 func (mat Lambertian) MarshalJSON() ([]byte, error) {
 	return json.Marshal(struct {
-		Type   string `json:"type"`
-		Albedo Color  `json:"albedo"`
+		Type   string    `json:"type"`
+		Albedo clr.Color `json:"albedo"`
 	}{
 		Type:   "Lambertian",
 		Albedo: mat.albedo,
 	})
 }
 
-func (mat Lambertian) scatter(r *Ray, rec *HitRecord) (bool, *Color, *Ray) {
+func (mat Lambertian) scatter(r *Ray, rec *HitRecord) (bool, *clr.Color, *Ray) {
 	dir := rec.normal.Add(RandomUnitSphere(r.rnd))
 	if dir.NearZero() {
 		dir = rec.normal
@@ -83,15 +85,15 @@ func (mat Lambertian) scatter(r *Ray, rec *HitRecord) (bool, *Color, *Ray) {
 }
 
 type Metal struct {
-	albedo Color
+	albedo clr.Color
 	fuzz   float64
 }
 
 func (mat Metal) MarshalJSON() ([]byte, error) {
 	return json.Marshal(struct {
-		Type   string  `json:"type"`
-		Albedo Color   `json:"albedo"`
-		Fuzz   float64 `json:"fuzz"`
+		Type   string    `json:"type"`
+		Albedo clr.Color `json:"albedo"`
+		Fuzz   float64   `json:"fuzz"`
 	}{
 		Type:   "Metal",
 		Albedo: mat.albedo,
@@ -99,7 +101,7 @@ func (mat Metal) MarshalJSON() ([]byte, error) {
 	})
 }
 
-func (mat Metal) scatter(r *Ray, rec *HitRecord) (bool, *Color, *Ray) {
+func (mat Metal) scatter(r *Ray, rec *HitRecord) (bool, *clr.Color, *Ray) {
 	reflected := r.Direction.Unit().Reflect(rec.normal)
 	reflected = reflected.Add(RandomUnitSphere(r.rnd).Scale(math.Min(mat.fuzz, 1.0)))
 	scattered := &Ray{rec.p, reflected, r.rnd}
@@ -132,7 +134,7 @@ func schlick(cosine float64, iRefIdx float64) float64 {
 	return r0 + (1.0-r0)*math.Pow(1.0-cosine, 5)
 }
 
-func (die Dielectric) scatter(r *Ray, rec *HitRecord) (bool, *Color, *Ray) {
+func (die Dielectric) scatter(r *Ray, rec *HitRecord) (bool, *clr.Color, *Ray) {
 	var (
 		outwardNormal Vec3
 		niOverNt      float64
@@ -162,5 +164,5 @@ func (die Dielectric) scatter(r *Ray, rec *HitRecord) (bool, *Color, *Ray) {
 		direction = r.Direction.Unit().Reflect(rec.normal)
 	}
 
-	return true, &White, &Ray{rec.p, direction, r.rnd}
+	return true, &clr.White, &Ray{rec.p, direction, r.rnd}
 }

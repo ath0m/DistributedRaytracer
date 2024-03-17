@@ -6,6 +6,8 @@ import (
 	"math/rand"
 	"sync"
 	"time"
+
+	clr "github.com/ath0m/DistributedRaytracer/engine/color"
 )
 
 // Pixels represents the array of pixels (in packed RGB value) to Render and/or save
@@ -36,7 +38,7 @@ func NewScene(width, height, raysPerPixel int, camera Camera, world Hittable) *S
 //	color is the color that has been computed by casting raysPerPixel through x/y coordinates (not normalized to avoid accumulating rounding errors)
 type pixel struct {
 	x, y, k      int
-	color        Color
+	color        clr.Color
 	raysPerPixel int
 }
 
@@ -74,7 +76,7 @@ func (scene *Scene) render(rnd Rnd, pixel *pixel, raysPerPixel int) uint32 {
 	c = c.Scale(1.0 / float64(pixel.raysPerPixel))
 
 	// gamma correction
-	c = Color{R: math.Sqrt(c.R), G: math.Sqrt(c.G), B: math.Sqrt(c.B)}
+	c = clr.Color{R: math.Sqrt(c.R), G: math.Sqrt(c.G), B: math.Sqrt(c.B)}
 
 	return c.PixelValue()
 }
@@ -163,22 +165,22 @@ func (scene *Scene) Render(parallelCount int) (Pixels, chan struct{}) {
 
 // color computes the color of the ray by checking which hitable gets hit and scattering
 // more rays (recursive) depending on material
-func color(r *Ray, world Hittable, depth int) Color {
+func color(r *Ray, world Hittable, depth int) clr.Color {
 
 	if hit, hr := world.hit(r, &Interval{0.001, math.MaxFloat64}); hit {
 		if depth >= 50 {
-			return Black
+			return clr.Black
 		}
 
 		if wasScattered, attenuation, scattered := hr.material.scatter(r, hr); wasScattered {
 			return attenuation.Mult(color(scattered, world, depth+1))
 		} else {
-			return Black
+			return clr.Black
 		}
 	}
 
 	unitDirection := r.Direction.Unit()
 	t := 0.5 * (unitDirection.Y + 1.0)
 
-	return White.Scale(1.0 - t).Add(Color{0.5, 0.7, 1.0}.Scale(t))
+	return clr.White.Scale(1.0 - t).Add(clr.Color{0.5, 0.7, 1.0}.Scale(t))
 }

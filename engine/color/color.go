@@ -1,4 +1,4 @@
-package engine
+package color
 
 import (
 	"math"
@@ -11,7 +11,7 @@ type Color struct {
 
 var (
 	White = Color{1.0, 1.0, 1.0}
-	Black = Color{}
+	Black = Color{0.0, 0.0, 0.0}
 )
 
 // Scale scales the Color by the value (return a new Color)
