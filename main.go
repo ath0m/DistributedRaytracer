@@ -16,7 +16,7 @@ func main() {
 	flag.IntVar(&options.Width, "w", 800, "width in pixel")
 	flag.IntVar(&options.Height, "h", 400, "height in pixel")
 	flag.IntVar(&options.CPU, "cpu", runtime.NumCPU(), "number of CPU to use (default to number of CPU available)")
-	flag.Int64Var(&options.Seed, "seed", 2017, "seed for random number generator")
+	flag.Int64Var(&options.Seed, "seed", 2024, "seed for random number generator")
 	flag.IntVar(&options.RaysPerPixel, "r", 100, "number of rays per pixel")
 	flag.StringVar(&options.Output, "o", "output.png", "path to file for saving (do not save if not defined)")
 	flag.StringVar(&options.Input, "i", "assets/world.json", "path to file for world definition in json format")
