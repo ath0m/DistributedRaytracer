@@ -1,19 +1,44 @@
 package engine
 
-import "math"
+import (
+	"encoding/json"
+	"math"
+)
 
 type Sphere struct {
-	center   Point3
-	radius   float64
-	material Material
+	Center   Point3   `json:"center"`
+	Radius   float64  `json:"radius"`
+	Material Material `json:"material"`
+}
+
+// UnmarshalJSON unmarshals JSON data into a Sphere object
+func (s *Sphere) UnmarshalJSON(data []byte) error {
+	type Alias Sphere
+	aux := &struct {
+		Material json.RawMessage `json:"material"`
+		*Alias
+	}{
+		Alias: (*Alias)(s),
+	}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.Material != nil {
+		material, err := UnmarshalMaterial(aux.Material)
+		if err != nil {
+			return err
+		}
+		s.Material = material
+	}
+	return nil
 }
 
 // hit implements the hit interface for a Sphere
 func (s Sphere) hit(r *Ray, interval *Interval) (bool, *HitRecord) {
-	oc := r.Origin.Sub(s.center)
+	oc := r.Origin.Sub(s.Center)
 	a := r.Direction.LengthSq()
 	b := Dot(oc, r.Direction)
-	c := oc.LengthSq() - s.radius*s.radius
+	c := oc.LengthSq() - s.Radius*s.Radius
 	discriminant := b*b - a*c
 
 	if discriminant < 0 {
@@ -33,8 +58,8 @@ func (s Sphere) hit(r *Ray, interval *Interval) (bool, *HitRecord) {
 	hr := HitRecord{
 		t:        root,
 		p:        hitPoint,
-		normal:   hitPoint.Sub(s.center).Scale(1 / s.radius),
-		material: s.material,
+		normal:   hitPoint.Sub(s.Center).Scale(1 / s.Radius),
+		material: s.Material,
 	}
 	return true, &hr
 }

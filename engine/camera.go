@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"encoding/json"
 	"math"
 )
 
@@ -15,6 +16,30 @@ type camera struct {
 	vertical        Vec3
 	u, v            Vec3
 	lensRadius      float64
+}
+
+func (c camera) MarshalJSON() ([]byte, error) {
+	type CameraJSON struct {
+		Origin          Point3  `json:"origin"`
+		LowerLeftCorner Point3  `json:"lowerLeftCorner"`
+		Horizontal      Vec3    `json:"horizontal"`
+		Vertical        Vec3    `json:"vertical"`
+		U               Vec3    `json:"u"`
+		V               Vec3    `json:"v"`
+		LensRadius      float64 `json:"lensRadius"`
+	}
+
+	cameraJSON := CameraJSON{
+		Origin:          c.origin,
+		LowerLeftCorner: c.lowerLeftCorner,
+		Horizontal:      c.horizontal,
+		Vertical:        c.vertical,
+		U:               c.u,
+		V:               c.v,
+		LensRadius:      c.lensRadius,
+	}
+
+	return json.Marshal(cameraJSON)
 }
 
 // NewCamera computes the parameters necessary for the camera...

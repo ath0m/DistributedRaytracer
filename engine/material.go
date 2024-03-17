@@ -1,14 +1,75 @@
 package engine
 
-import "math"
+import (
+	"encoding/json"
+	"fmt"
+	"math"
+)
 
 // Material defines how a material scatter light
 type Material interface {
 	scatter(r *Ray, rec *HitRecord) (wasScattered bool, attenuation *Color, scattered *Ray)
 }
 
+func UnmarshalMaterial(data json.RawMessage) (Material, error) {
+	var m struct {
+		Type string `json:"type"`
+	}
+
+	err := json.Unmarshal(data, &m)
+	if err != nil {
+		return nil, err
+	}
+
+	switch m.Type {
+	case "Lambertian":
+		var l struct {
+			Albedo Color `json:"albedo"`
+		}
+		err := json.Unmarshal(data, &l)
+		if err != nil {
+			return nil, err
+		}
+		return Lambertian{albedo: l.Albedo}, nil
+
+	case "Metal":
+		var mt struct {
+			Albedo Color   `json:"albedo"`
+			Fuzz   float64 `json:"fuzz"`
+		}
+		err := json.Unmarshal(data, &mt)
+		if err != nil {
+			return nil, err
+		}
+		return Metal{albedo: mt.Albedo, fuzz: mt.Fuzz}, nil
+
+	case "Dielectric":
+		var d struct {
+			RefIdx float64 `json:"refIdx"`
+		}
+		err := json.Unmarshal(data, &d)
+		if err != nil {
+			return nil, err
+		}
+		return Dielectric{refIdx: d.RefIdx}, nil
+
+	default:
+		return nil, fmt.Errorf("unknown material type: %s", m.Type)
+	}
+}
+
 type Lambertian struct {
 	albedo Color
+}
+
+func (mat Lambertian) MarshalJSON() ([]byte, error) {
+	return json.Marshal(struct {
+		Type   string `json:"type"`
+		Albedo Color  `json:"albedo"`
+	}{
+		Type:   "Lambertian",
+		Albedo: mat.albedo,
+	})
 }
 
 func (mat Lambertian) scatter(r *Ray, rec *HitRecord) (bool, *Color, *Ray) {
@@ -26,6 +87,18 @@ type Metal struct {
 	fuzz   float64
 }
 
+func (mat Metal) MarshalJSON() ([]byte, error) {
+	return json.Marshal(struct {
+		Type   string  `json:"type"`
+		Albedo Color   `json:"albedo"`
+		Fuzz   float64 `json:"fuzz"`
+	}{
+		Type:   "Metal",
+		Albedo: mat.albedo,
+		Fuzz:   mat.fuzz,
+	})
+}
+
 func (mat Metal) scatter(r *Ray, rec *HitRecord) (bool, *Color, *Ray) {
 	reflected := r.Direction.Unit().Reflect(rec.normal)
 	reflected = reflected.Add(RandomUnitSphere(r.rnd).Scale(math.Min(mat.fuzz, 1.0)))
@@ -41,6 +114,16 @@ func (mat Metal) scatter(r *Ray, rec *HitRecord) (bool, *Color, *Ray) {
 
 type Dielectric struct {
 	refIdx float64
+}
+
+func (die Dielectric) MarshalJSON() ([]byte, error) {
+	return json.Marshal(struct {
+		Type   string  `json:"type"`
+		RefIdx float64 `json:"refIdx"`
+	}{
+		Type:   "Dielectric",
+		RefIdx: die.refIdx,
+	})
 }
 
 func schlick(cosine float64, iRefIdx float64) float64 {
