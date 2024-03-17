@@ -1,10 +1,12 @@
 package engine
 
+import "github.com/ath0m/DistributedRaytracer/engine/utils"
+
 // Ray represents a ray defined by its origin and direction
 type Ray struct {
 	Origin    Point3
 	Direction Vec3
-	rnd       Rnd
+	rnd       utils.Rnd
 }
 
 // PointAt returns a new point along the ray (0 will return the origin)

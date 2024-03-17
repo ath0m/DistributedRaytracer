@@ -8,6 +8,7 @@ import (
 	"time"
 
 	clr "github.com/ath0m/DistributedRaytracer/engine/color"
+	"github.com/ath0m/DistributedRaytracer/engine/utils"
 )
 
 // Pixels represents the array of pixels (in packed RGB value) to Render and/or save
@@ -59,7 +60,7 @@ func split(buf []*pixel, count int) [][]*pixel {
 // render works on a single pixels, casting raysPerPixel through it and accumulating the color
 //
 //	returns the normalized and gamma corrected value
-func (scene *Scene) render(rnd Rnd, pixel *pixel, raysPerPixel int) uint32 {
+func (scene *Scene) render(rnd utils.Rnd, pixel *pixel, raysPerPixel int) uint32 {
 	c := pixel.color
 
 	for s := 0; s < raysPerPixel; s++ {
@@ -167,7 +168,7 @@ func (scene *Scene) Render(parallelCount int) (Pixels, chan struct{}) {
 // more rays (recursive) depending on material
 func color(r *Ray, world Hittable, depth int) clr.Color {
 
-	if hit, hr := world.hit(r, &Interval{0.001, math.MaxFloat64}); hit {
+	if hit, hr := world.hit(r, &utils.Interval{0.001, math.MaxFloat64}); hit {
 		if depth >= 50 {
 			return clr.Black
 		}

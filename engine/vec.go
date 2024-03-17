@@ -2,6 +2,8 @@ package engine
 
 import (
 	"math"
+
+	"github.com/ath0m/DistributedRaytracer/engine/utils"
 )
 
 // Vec3 defines a vector in 3D space
@@ -84,20 +86,20 @@ func (v Vec3) Refract(n Vec3, niOverNt float64) (bool, *Vec3) {
 	return false, nil
 }
 
-func Random(rnd Rnd) Vec3 {
+func Random(rnd utils.Rnd) Vec3 {
 	return Vec3{rnd.Float64(), rnd.Float64(), rnd.Float64()}
 }
 
-func RandomInt(rnd Rnd, interval *Interval) Vec3 {
-	diff := interval.max - interval.min
-	x := interval.min + rnd.Float64()*diff
-	y := interval.min + rnd.Float64()*diff
-	z := interval.min + rnd.Float64()*diff
+func RandomInt(rnd utils.Rnd, interval *utils.Interval) Vec3 {
+	diff := interval.Max - interval.Min
+	x := interval.Min + rnd.Float64()*diff
+	y := interval.Min + rnd.Float64()*diff
+	z := interval.Min + rnd.Float64()*diff
 	return Vec3{x, y, z}
 }
 
-func RandomInUnitSphere(rnd Rnd) Vec3 {
-	interval := Interval{-1, 1}
+func RandomInUnitSphere(rnd utils.Rnd) Vec3 {
+	interval := utils.Interval{-1, 1}
 	for {
 		if v := RandomInt(rnd, &interval); v.LengthSq() < 1 {
 			return v
@@ -105,11 +107,11 @@ func RandomInUnitSphere(rnd Rnd) Vec3 {
 	}
 }
 
-func RandomUnitSphere(rnd Rnd) Vec3 {
+func RandomUnitSphere(rnd utils.Rnd) Vec3 {
 	return RandomInUnitSphere(rnd).Unit()
 }
 
-func RandomInUnitDisk(rnd Rnd) Vec3 {
+func RandomInUnitDisk(rnd utils.Rnd) Vec3 {
 	for {
 		p := Vec3{2.0*rnd.Float64() - 1.0, 2.0*rnd.Float64() - 1.0, 0}
 		if Dot(p, p) < 1.0 {

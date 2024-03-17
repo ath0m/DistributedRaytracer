@@ -2,10 +2,12 @@ package engine
 
 import (
 	"math"
+
+	"github.com/ath0m/DistributedRaytracer/engine/utils"
 )
 
 type Camera interface {
-	ray(rnd Rnd, u, v float64) *Ray
+	ray(rnd utils.Rnd, u, v float64) *Ray
 }
 
 type camera struct {
@@ -39,7 +41,7 @@ func NewCamera(lookFrom Point3, lookAt Point3, vup Vec3, vfov float64, aspect fl
 }
 
 // ray implements the main api of the Camera interface according to the book
-func (c camera) ray(rnd Rnd, u, v float64) *Ray {
+func (c camera) ray(rnd utils.Rnd, u, v float64) *Ray {
 	d := c.LowerLeftCorner.Translate(c.Horizontal.Scale(u)).Translate(c.Vertical.Scale(v)).Sub(c.Origin)
 	origin := c.Origin
 

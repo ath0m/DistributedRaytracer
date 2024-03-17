@@ -3,6 +3,8 @@ package engine
 import (
 	"encoding/json"
 	"math"
+
+	"github.com/ath0m/DistributedRaytracer/engine/utils"
 )
 
 type Sphere struct {
@@ -34,7 +36,7 @@ func (s *Sphere) UnmarshalJSON(data []byte) error {
 }
 
 // hit implements the hit interface for a Sphere
-func (s Sphere) hit(r *Ray, interval *Interval) (bool, *HitRecord) {
+func (s Sphere) hit(r *Ray, interval *utils.Interval) (bool, *HitRecord) {
 	oc := r.Origin.Sub(s.Center)
 	a := r.Direction.LengthSq()
 	b := Dot(oc, r.Direction)
@@ -47,9 +49,9 @@ func (s Sphere) hit(r *Ray, interval *Interval) (bool, *HitRecord) {
 	discriminantSquareRoot := math.Sqrt(discriminant)
 
 	root := (-b - discriminantSquareRoot) / a
-	if !interval.surrounds(root) {
+	if !interval.Surrounds(root) {
 		root = (-b + discriminantSquareRoot) / a
-		if !interval.surrounds(root) {
+		if !interval.Surrounds(root) {
 			return false, nil
 		}
 	}
