@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/ath0m/DistributedRaytracer/engine/camera"
 	clr "github.com/ath0m/DistributedRaytracer/engine/color"
 	"github.com/ath0m/DistributedRaytracer/engine/geometry"
 	"github.com/ath0m/DistributedRaytracer/engine/utils"
@@ -19,11 +20,11 @@ type Pixels []uint32
 type Scene struct {
 	width, height int
 	raysPerPixel  int
-	camera        Camera
+	camera        camera.Camera
 	world         Hittable
 }
 
-func NewScene(width, height, raysPerPixel int, camera Camera, world Hittable) *Scene {
+func NewScene(width, height, raysPerPixel int, camera camera.Camera, world Hittable) *Scene {
 	return &Scene{
 		width:        width,
 		height:       height,
@@ -67,7 +68,7 @@ func (scene *Scene) render(rnd utils.Rnd, pixel *pixel, raysPerPixel int) uint32
 	for s := 0; s < raysPerPixel; s++ {
 		u := (float64(pixel.x) + rnd.Float64()) / float64(scene.width)
 		v := (float64(pixel.y) + rnd.Float64()) / float64(scene.height)
-		r := scene.camera.ray(rnd, u, v)
+		r := scene.camera.Ray(rnd, u, v)
 		c = c.Add(color(r, scene.world, 0))
 	}
 
@@ -155,7 +156,7 @@ func (scene *Scene) Render(parallelCount int) (Pixels, chan struct{}) {
 		// wait for the pass to be completed
 		wg.Wait()
 
-		totalTime := time.Now().Sub(totalStart)
+		totalTime := time.Since(totalStart)
 		fmt.Printf("Processed %v rays per pixel in %v.", scene.raysPerPixel, totalTime)
 
 		// signal completion
@@ -169,12 +170,12 @@ func (scene *Scene) Render(parallelCount int) (Pixels, chan struct{}) {
 // more rays (recursive) depending on material
 func color(r *geometry.Ray, world Hittable, depth int) clr.Color {
 
-	if hit, hr := world.hit(r, &utils.Interval{0.001, math.MaxFloat64}); hit {
+	if hit, hr := world.Hit(r, &utils.Interval{Min: 0.001, Max: math.MaxFloat64}); hit {
 		if depth >= 50 {
 			return clr.Black
 		}
 
-		if wasScattered, attenuation, scattered := hr.material.scatter(r, hr); wasScattered {
+		if wasScattered, attenuation, scattered := hr.Material.scatter(r, hr); wasScattered {
 			return attenuation.Mult(color(scattered, world, depth+1))
 		} else {
 			return clr.Black
@@ -184,5 +185,5 @@ func color(r *geometry.Ray, world Hittable, depth int) clr.Color {
 	unitDirection := r.Direction.Unit()
 	t := 0.5 * (unitDirection.Y + 1.0)
 
-	return clr.White.Scale(1.0 - t).Add(clr.Color{0.5, 0.7, 1.0}.Scale(t))
+	return clr.White.Scale(1.0 - t).Add(clr.Color{R: 0.5, G: 0.7, B: 1.0}.Scale(t))
 }

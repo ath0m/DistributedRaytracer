@@ -76,11 +76,11 @@ func (mat Lambertian) MarshalJSON() ([]byte, error) {
 }
 
 func (mat Lambertian) scatter(r *geometry.Ray, rec *HitRecord) (bool, *clr.Color, *geometry.Ray) {
-	dir := rec.normal.Add(geometry.RandomUnitSphere(r.Rnd))
+	dir := rec.Normal.Add(geometry.RandomUnitSphere(r.Rnd))
 	if dir.NearZero() {
-		dir = rec.normal
+		dir = rec.Normal
 	}
-	scattered := &geometry.Ray{rec.p, dir, r.Rnd}
+	scattered := &geometry.Ray{Origin: rec.P, Direction: dir, Rnd: r.Rnd}
 	attenuation := &mat.albedo
 	return true, attenuation, scattered
 }
@@ -103,12 +103,12 @@ func (mat Metal) MarshalJSON() ([]byte, error) {
 }
 
 func (mat Metal) scatter(r *geometry.Ray, rec *HitRecord) (bool, *clr.Color, *geometry.Ray) {
-	reflected := r.Direction.Unit().Reflect(rec.normal)
+	reflected := r.Direction.Unit().Reflect(rec.Normal)
 	reflected = reflected.Add(geometry.RandomUnitSphere(r.Rnd).Scale(math.Min(mat.fuzz, 1.0)))
-	scattered := &geometry.Ray{rec.p, reflected, r.Rnd}
+	scattered := &geometry.Ray{Origin: rec.P, Direction: reflected, Rnd: r.Rnd}
 	attenuation := &mat.albedo
 
-	if geometry.Dot(scattered.Direction, rec.normal) > 0 {
+	if geometry.Dot(scattered.Direction, rec.Normal) > 0 {
 		return true, attenuation, scattered
 	}
 
@@ -142,14 +142,14 @@ func (die Dielectric) scatter(r *geometry.Ray, rec *HitRecord) (bool, *clr.Color
 		cosine        float64
 	)
 
-	dotRayNormal := geometry.Dot(r.Direction, rec.normal)
+	dotRayNormal := geometry.Dot(r.Direction, rec.Normal)
 	if dotRayNormal > 0 {
-		outwardNormal = rec.normal.Negate()
+		outwardNormal = rec.Normal.Negate()
 		niOverNt = die.refIdx
 		cosine = dotRayNormal / r.Direction.Length()
 		cosine = math.Sqrt(1.0 - die.refIdx*die.refIdx*(1.0-cosine*cosine))
 	} else {
-		outwardNormal = rec.normal
+		outwardNormal = rec.Normal
 		niOverNt = 1.0 / die.refIdx
 		cosine = -dotRayNormal / r.Direction.Length()
 	}
@@ -162,8 +162,8 @@ func (die Dielectric) scatter(r *geometry.Ray, rec *HitRecord) (bool, *clr.Color
 	if wasRefracted && r.Rnd.Float64() >= schlick(cosine, die.refIdx) {
 		direction = *refracted
 	} else {
-		direction = r.Direction.Unit().Reflect(rec.normal)
+		direction = r.Direction.Unit().Reflect(rec.Normal)
 	}
 
-	return true, &clr.White, &geometry.Ray{rec.p, direction, r.Rnd}
+	return true, &clr.White, &geometry.Ray{Origin: rec.P, Direction: direction, Rnd: r.Rnd}
 }

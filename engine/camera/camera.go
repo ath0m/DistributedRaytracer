@@ -1,6 +1,7 @@
-package engine
+package camera
 
 import (
+	"encoding/json"
 	"math"
 
 	"github.com/ath0m/DistributedRaytracer/engine/geometry"
@@ -8,7 +9,7 @@ import (
 )
 
 type Camera interface {
-	ray(rnd utils.Rnd, u, v float64) *geometry.Ray
+	Ray(rnd utils.Rnd, u, v float64) *geometry.Ray
 }
 
 type camera struct {
@@ -41,8 +42,8 @@ func NewCamera(lookFrom geometry.Point3, lookAt geometry.Point3, vup geometry.Ve
 	return camera{origin, lowerLeftCorner, horizontal, vertical, u, v, aperture / 2.0}
 }
 
-// ray implements the main api of the Camera interface according to the book
-func (c camera) ray(rnd utils.Rnd, u, v float64) *geometry.Ray {
+// Ray implements the main api of the Camera interface according to the book
+func (c camera) Ray(rnd utils.Rnd, u, v float64) *geometry.Ray {
 	d := c.LowerLeftCorner.Translate(c.Horizontal.Scale(u)).Translate(c.Vertical.Scale(v)).Sub(c.Origin)
 	origin := c.Origin
 
@@ -52,5 +53,12 @@ func (c camera) ray(rnd utils.Rnd, u, v float64) *geometry.Ray {
 		origin = origin.Translate(offset)
 		d = d.Sub(offset)
 	}
-	return &geometry.Ray{origin, d, rnd}
+	return &geometry.Ray{Origin: origin, Direction: d, Rnd: rnd}
+}
+
+// UnmarshalJSON unmarshals JSON data into a Camera object
+func UnmarshalCamera(data json.RawMessage) Camera {
+	var c camera
+	json.Unmarshal(data, &c)
+	return c
 }
