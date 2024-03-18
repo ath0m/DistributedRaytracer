@@ -12,10 +12,10 @@ import (
 )
 
 type RenderOptions struct {
-	Width        int   `json:"width"` 			// width in pixel
-	Height       int   `json:"height"` 			// height in pixel
-	RaysPerPixel int   `json:"raysperpixel"` 	// number of rays per pixel
-	Seed         int64 `json:"seed"` 			// seed for random number generator
+	Width        int   `json:"width"`        // width in pixel
+	Height       int   `json:"height"`       // height in pixel
+	RaysPerPixel int   `json:"raysperpixel"` // number of rays per pixel
+	Seed         int64 `json:"seed"`         // seed for random number generator
 }
 
 func handleRender(w http.ResponseWriter, req *http.Request) {
@@ -36,6 +36,7 @@ func handleRender(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		msg := fmt.Sprintf("Error while loading world [%v]", err)
 		http.Error(w, msg, http.StatusBadRequest)
+		return
 	}
 
 	scene := engine.NewScene(requestOptions.Width, requestOptions.Height, requestOptions.RaysPerPixel, world.Camera, world.Objects)
