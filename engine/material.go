@@ -11,7 +11,7 @@ import (
 
 // Material defines how a material scatter light
 type Material interface {
-	scatter(r *Ray, rec *HitRecord) (wasScattered bool, attenuation *clr.Color, scattered *Ray)
+	scatter(r *geometry.Ray, rec *HitRecord) (wasScattered bool, attenuation *clr.Color, scattered *geometry.Ray)
 }
 
 func UnmarshalMaterial(data json.RawMessage) (Material, error) {
@@ -75,12 +75,12 @@ func (mat Lambertian) MarshalJSON() ([]byte, error) {
 	})
 }
 
-func (mat Lambertian) scatter(r *Ray, rec *HitRecord) (bool, *clr.Color, *Ray) {
-	dir := rec.normal.Add(geometry.RandomUnitSphere(r.rnd))
+func (mat Lambertian) scatter(r *geometry.Ray, rec *HitRecord) (bool, *clr.Color, *geometry.Ray) {
+	dir := rec.normal.Add(geometry.RandomUnitSphere(r.Rnd))
 	if dir.NearZero() {
 		dir = rec.normal
 	}
-	scattered := &Ray{rec.p, dir, r.rnd}
+	scattered := &geometry.Ray{rec.p, dir, r.Rnd}
 	attenuation := &mat.albedo
 	return true, attenuation, scattered
 }
@@ -102,10 +102,10 @@ func (mat Metal) MarshalJSON() ([]byte, error) {
 	})
 }
 
-func (mat Metal) scatter(r *Ray, rec *HitRecord) (bool, *clr.Color, *Ray) {
+func (mat Metal) scatter(r *geometry.Ray, rec *HitRecord) (bool, *clr.Color, *geometry.Ray) {
 	reflected := r.Direction.Unit().Reflect(rec.normal)
-	reflected = reflected.Add(geometry.RandomUnitSphere(r.rnd).Scale(math.Min(mat.fuzz, 1.0)))
-	scattered := &Ray{rec.p, reflected, r.rnd}
+	reflected = reflected.Add(geometry.RandomUnitSphere(r.Rnd).Scale(math.Min(mat.fuzz, 1.0)))
+	scattered := &geometry.Ray{rec.p, reflected, r.Rnd}
 	attenuation := &mat.albedo
 
 	if geometry.Dot(scattered.Direction, rec.normal) > 0 {
@@ -135,7 +135,7 @@ func schlick(cosine float64, iRefIdx float64) float64 {
 	return r0 + (1.0-r0)*math.Pow(1.0-cosine, 5)
 }
 
-func (die Dielectric) scatter(r *Ray, rec *HitRecord) (bool, *clr.Color, *Ray) {
+func (die Dielectric) scatter(r *geometry.Ray, rec *HitRecord) (bool, *clr.Color, *geometry.Ray) {
 	var (
 		outwardNormal geometry.Vec3
 		niOverNt      float64
@@ -159,11 +159,11 @@ func (die Dielectric) scatter(r *Ray, rec *HitRecord) (bool, *clr.Color, *Ray) {
 	var direction geometry.Vec3
 
 	// refract only with some probability
-	if wasRefracted && r.rnd.Float64() >= schlick(cosine, die.refIdx) {
+	if wasRefracted && r.Rnd.Float64() >= schlick(cosine, die.refIdx) {
 		direction = *refracted
 	} else {
 		direction = r.Direction.Unit().Reflect(rec.normal)
 	}
 
-	return true, &clr.White, &Ray{rec.p, direction, r.rnd}
+	return true, &clr.White, &geometry.Ray{rec.p, direction, r.Rnd}
 }

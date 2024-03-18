@@ -37,7 +37,7 @@ func (s *Sphere) UnmarshalJSON(data []byte) error {
 }
 
 // hit implements the hit interface for a Sphere
-func (s Sphere) hit(r *Ray, interval *utils.Interval) (bool, *HitRecord) {
+func (s Sphere) hit(r *geometry.Ray, interval *utils.Interval) (bool, *HitRecord) {
 	oc := r.Origin.Sub(s.Center)
 	a := r.Direction.LengthSq()
 	b := geometry.Dot(oc, r.Direction)

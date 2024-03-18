@@ -14,14 +14,14 @@ type HitRecord struct {
 
 // Hittable defines the interface of objects that can be hit by a ray
 type Hittable interface {
-	hit(r *Ray, interval *utils.Interval) (bool, *HitRecord)
+	hit(r *geometry.Ray, interval *utils.Interval) (bool, *HitRecord)
 }
 
 // HittableList defines a simple list of hittable
 type HittableList []Hittable
 
 // hit defines the method for a list of hittables: will return the one closest
-func (hl HittableList) hit(r *Ray, interval *utils.Interval) (bool, *HitRecord) {
+func (hl HittableList) hit(r *geometry.Ray, interval *utils.Interval) (bool, *HitRecord) {
 	var res *HitRecord
 	hitAnything := false
 

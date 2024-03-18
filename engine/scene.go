@@ -8,6 +8,7 @@ import (
 	"time"
 
 	clr "github.com/ath0m/DistributedRaytracer/engine/color"
+	"github.com/ath0m/DistributedRaytracer/engine/geometry"
 	"github.com/ath0m/DistributedRaytracer/engine/utils"
 )
 
@@ -166,7 +167,7 @@ func (scene *Scene) Render(parallelCount int) (Pixels, chan struct{}) {
 
 // color computes the color of the ray by checking which hitable gets hit and scattering
 // more rays (recursive) depending on material
-func color(r *Ray, world Hittable, depth int) clr.Color {
+func color(r *geometry.Ray, world Hittable, depth int) clr.Color {
 
 	if hit, hr := world.hit(r, &utils.Interval{0.001, math.MaxFloat64}); hit {
 		if depth >= 50 {

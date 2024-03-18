@@ -8,7 +8,7 @@ import (
 )
 
 type Camera interface {
-	ray(rnd utils.Rnd, u, v float64) *Ray
+	ray(rnd utils.Rnd, u, v float64) *geometry.Ray
 }
 
 type camera struct {
@@ -42,7 +42,7 @@ func NewCamera(lookFrom geometry.Point3, lookAt geometry.Point3, vup geometry.Ve
 }
 
 // ray implements the main api of the Camera interface according to the book
-func (c camera) ray(rnd utils.Rnd, u, v float64) *Ray {
+func (c camera) ray(rnd utils.Rnd, u, v float64) *geometry.Ray {
 	d := c.LowerLeftCorner.Translate(c.Horizontal.Scale(u)).Translate(c.Vertical.Scale(v)).Sub(c.Origin)
 	origin := c.Origin
 
@@ -52,5 +52,5 @@ func (c camera) ray(rnd utils.Rnd, u, v float64) *Ray {
 		origin = origin.Translate(offset)
 		d = d.Sub(offset)
 	}
-	return &Ray{origin, d, rnd}
+	return &geometry.Ray{origin, d, rnd}
 }
