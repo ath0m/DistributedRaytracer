@@ -19,22 +19,10 @@ go build -o raytracer
 
 ## Usage
 
+To generate a new render and save it to `output.png` file on local machine, start application and perform a POST request:
+
 ```bash
-Usage of ./raytracer:
-  -cpu int
-        number of CPU to use (default to number of CPU available) (default 14)
-  -h int
-        height in pixel (default 400)
-  -i string
-        path to file for world definition in json format (default "assets/world.json")
-  -o string
-        path to file for saving (do not save if not defined) (default "output.png")
-  -r int
-        number of rays per pixel (default 100)
-  -seed int
-        seed for random number generator (default 2024)
-  -w int
-        width in pixel (default 800)
+curl -X POST http://localhost:8090/render -d '{"width": 800, "height": 400, "raysperpixel": 10, "seed": 2024}' --output output.png
 ```
 
 ## Reference

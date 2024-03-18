@@ -21,6 +21,26 @@ type Options struct {
 	CPU          int    // number of CPU to use
 }
 
+func CreateImage(pixels []uint32, width int, height int) *image.NRGBA {
+	img := image.NewNRGBA(image.Rect(0, 0, width, height))
+
+	k := 0
+	for y := 0; y < height; y++ {
+		for x := 0; x < width; x++ {
+			p := pixels[k]
+			img.Set(x, y, clr.NRGBA{
+				R: uint8(p >> 16 & 0xFF),
+				G: uint8(p >> 8 & 0xFF),
+				B: uint8(p & 0xFF),
+				A: 255,
+			})
+			k++
+		}
+	}
+
+	return img
+}
+
 // SaveImage saves the image (if requested) to a file in png format
 func SaveImage(pixels []uint32, options Options) (error, bool) {
 	if options.Output != "" {
@@ -29,21 +49,7 @@ func SaveImage(pixels []uint32, options Options) (error, bool) {
 			return err, true
 		}
 
-		img := image.NewNRGBA(image.Rect(0, 0, options.Width, options.Height))
-
-		k := 0
-		for y := 0; y < options.Height; y++ {
-			for x := 0; x < options.Width; x++ {
-				p := pixels[k]
-				img.Set(x, y, clr.NRGBA{
-					R: uint8(p >> 16 & 0xFF),
-					G: uint8(p >> 8 & 0xFF),
-					B: uint8(p & 0xFF),
-					A: 255,
-				})
-				k++
-			}
-		}
+		img := CreateImage(pixels, options.Width, options.Height)
 
 		if err := png.Encode(f, img); err != nil {
 			f.Close()
