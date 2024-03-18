@@ -1,4 +1,4 @@
-package engine
+package geometry
 
 // Point3 defines a point in 3D space
 type Point3 struct {
@@ -17,5 +17,5 @@ func (p Point3) Sub(p2 Point3) Vec3 {
 
 // Vec3 converts a point to a vector (centered at origin)
 func (p Point3) Vec3() Vec3 {
-	return Vec3{p.X, p.Y, p.Z}
+	return Vec3(p)
 }

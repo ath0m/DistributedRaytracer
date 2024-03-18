@@ -1,4 +1,4 @@
-package engine
+package geometry
 
 import (
 	"math"
@@ -99,7 +99,7 @@ func RandomInt(rnd utils.Rnd, interval *utils.Interval) Vec3 {
 }
 
 func RandomInUnitSphere(rnd utils.Rnd) Vec3 {
-	interval := utils.Interval{-1, 1}
+	interval := utils.Interval{Min: -1, Max: 1}
 	for {
 		if v := RandomInt(rnd, &interval); v.LengthSq() < 1 {
 			return v

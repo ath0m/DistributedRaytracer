@@ -6,6 +6,7 @@ import (
 	"math"
 
 	clr "github.com/ath0m/DistributedRaytracer/engine/color"
+	"github.com/ath0m/DistributedRaytracer/engine/geometry"
 )
 
 // Material defines how a material scatter light
@@ -75,7 +76,7 @@ func (mat Lambertian) MarshalJSON() ([]byte, error) {
 }
 
 func (mat Lambertian) scatter(r *Ray, rec *HitRecord) (bool, *clr.Color, *Ray) {
-	dir := rec.normal.Add(RandomUnitSphere(r.rnd))
+	dir := rec.normal.Add(geometry.RandomUnitSphere(r.rnd))
 	if dir.NearZero() {
 		dir = rec.normal
 	}
@@ -103,11 +104,11 @@ func (mat Metal) MarshalJSON() ([]byte, error) {
 
 func (mat Metal) scatter(r *Ray, rec *HitRecord) (bool, *clr.Color, *Ray) {
 	reflected := r.Direction.Unit().Reflect(rec.normal)
-	reflected = reflected.Add(RandomUnitSphere(r.rnd).Scale(math.Min(mat.fuzz, 1.0)))
+	reflected = reflected.Add(geometry.RandomUnitSphere(r.rnd).Scale(math.Min(mat.fuzz, 1.0)))
 	scattered := &Ray{rec.p, reflected, r.rnd}
 	attenuation := &mat.albedo
 
-	if Dot(scattered.Direction, rec.normal) > 0 {
+	if geometry.Dot(scattered.Direction, rec.normal) > 0 {
 		return true, attenuation, scattered
 	}
 
@@ -136,12 +137,12 @@ func schlick(cosine float64, iRefIdx float64) float64 {
 
 func (die Dielectric) scatter(r *Ray, rec *HitRecord) (bool, *clr.Color, *Ray) {
 	var (
-		outwardNormal Vec3
+		outwardNormal geometry.Vec3
 		niOverNt      float64
 		cosine        float64
 	)
 
-	dotRayNormal := Dot(r.Direction, rec.normal)
+	dotRayNormal := geometry.Dot(r.Direction, rec.normal)
 	if dotRayNormal > 0 {
 		outwardNormal = rec.normal.Negate()
 		niOverNt = die.refIdx
@@ -155,7 +156,7 @@ func (die Dielectric) scatter(r *Ray, rec *HitRecord) (bool, *clr.Color, *Ray) {
 
 	wasRefracted, refracted := r.Direction.Refract(outwardNormal, niOverNt)
 
-	var direction Vec3
+	var direction geometry.Vec3
 
 	// refract only with some probability
 	if wasRefracted && r.rnd.Float64() >= schlick(cosine, die.refIdx) {

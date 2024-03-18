@@ -4,13 +4,14 @@ import (
 	"encoding/json"
 	"math"
 
+	"github.com/ath0m/DistributedRaytracer/engine/geometry"
 	"github.com/ath0m/DistributedRaytracer/engine/utils"
 )
 
 type Sphere struct {
-	Center   Point3   `json:"center"`
-	Radius   float64  `json:"radius"`
-	Material Material `json:"material"`
+	Center   geometry.Point3 `json:"center"`
+	Radius   float64         `json:"radius"`
+	Material Material        `json:"material"`
 }
 
 // UnmarshalJSON unmarshals JSON data into a Sphere object
@@ -39,7 +40,7 @@ func (s *Sphere) UnmarshalJSON(data []byte) error {
 func (s Sphere) hit(r *Ray, interval *utils.Interval) (bool, *HitRecord) {
 	oc := r.Origin.Sub(s.Center)
 	a := r.Direction.LengthSq()
-	b := Dot(oc, r.Direction)
+	b := geometry.Dot(oc, r.Direction)
 	c := oc.LengthSq() - s.Radius*s.Radius
 	discriminant := b*b - a*c
 
