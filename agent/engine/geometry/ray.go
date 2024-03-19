@@ -1,7 +1,7 @@
 package geometry
 
 import (
-	"github.com/ath0m/DistributedRaytracer/engine/utils"
+	"github.com/ath0m/DistributedRaytracer/agent/engine/utils"
 )
 
 type Ray struct {

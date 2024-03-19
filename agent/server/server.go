@@ -7,8 +7,7 @@ import (
 	"net/http"
 	"runtime"
 
-	"github.com/ath0m/DistributedRaytracer/engine"
-	"github.com/ath0m/DistributedRaytracer/utils"
+	"github.com/ath0m/DistributedRaytracer/agent/engine"
 )
 
 type RenderOptions struct {
@@ -32,7 +31,7 @@ func handleRender(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	world, err := utils.LoadWorld("assets/world.json")
+	world, err := engine.LoadWorld("assets/world.json")
 	if err != nil {
 		msg := fmt.Sprintf("Error while loading world [%v]", err)
 		http.Error(w, msg, http.StatusBadRequest)
@@ -45,7 +44,7 @@ func handleRender(w http.ResponseWriter, req *http.Request) {
 	<-completed
 	fmt.Println("Render complete.")
 
-	img := utils.CreateImage(pixels, requestOptions.Width, requestOptions.Height)
+	img := engine.CreateImage(pixels, requestOptions.Width, requestOptions.Height)
 
 	w.Header().Set("Content-Type", "image/png")
 	png.Encode(w, img)

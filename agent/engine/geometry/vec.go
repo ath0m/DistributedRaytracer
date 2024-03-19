@@ -3,7 +3,7 @@ package geometry
 import (
 	"math"
 
-	"github.com/ath0m/DistributedRaytracer/engine/utils"
+	"github.com/ath0m/DistributedRaytracer/agent/engine/utils"
 )
 
 // Vec3 defines a vector in 3D space

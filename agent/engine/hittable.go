@@ -1,8 +1,8 @@
 package engine
 
 import (
-	"github.com/ath0m/DistributedRaytracer/engine/geometry"
-	"github.com/ath0m/DistributedRaytracer/engine/utils"
+	"github.com/ath0m/DistributedRaytracer/agent/engine/geometry"
+	"github.com/ath0m/DistributedRaytracer/agent/engine/utils"
 )
 
 type HitRecord struct {

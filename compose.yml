@@ -1,0 +1,5 @@
+services:
+  agent:
+    build: ./agent
+    ports:
+      - "8090:8090"

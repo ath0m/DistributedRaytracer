@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/ath0m/DistributedRaytracer/engine/geometry"
+	"github.com/ath0m/DistributedRaytracer/agent/engine/geometry"
 )
 
 type mockRnd struct{}

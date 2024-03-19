@@ -2,8 +2,9 @@ package engine
 
 import (
 	"encoding/json"
+	"os"
 
-	"github.com/ath0m/DistributedRaytracer/engine/camera"
+	"github.com/ath0m/DistributedRaytracer/agent/engine/camera"
 )
 
 type World struct {
@@ -28,4 +29,19 @@ func (w *World) UnmarshalJSON(data []byte) error {
 	}
 
 	return nil
+}
+
+func LoadWorld(file string) (*World, error) {
+	content, err := os.ReadFile(file)
+	if err != nil {
+		return nil, err
+	}
+
+	var world World
+	err = json.Unmarshal(content, &world)
+	if err != nil {
+		return nil, err
+	}
+
+	return &world, nil
 }

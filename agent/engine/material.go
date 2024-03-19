@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"math"
 
-	clr "github.com/ath0m/DistributedRaytracer/engine/color"
-	"github.com/ath0m/DistributedRaytracer/engine/geometry"
+	clr "github.com/ath0m/DistributedRaytracer/agent/engine/color"
+	"github.com/ath0m/DistributedRaytracer/agent/engine/geometry"
 )
 
 // Material defines how a material scatter light

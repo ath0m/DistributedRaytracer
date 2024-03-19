@@ -10,18 +10,12 @@ The objective of this project is to create a distributed raytracer service capab
 
 ![Example](docs/render.png)
 
-## Build
-
-```bash
-go build -o raytracer
-./raytracer
-```
-
 ## Usage
 
 To generate a new render and save it to `output.png` file on local machine, start application and perform a POST request:
 
 ```bash
+docker compose up -d
 curl -X POST http://localhost:8090/render -d '{"width": 800, "height": 400, "raysperpixel": 10, "seed": 2024}' --output output.png
 ```
 

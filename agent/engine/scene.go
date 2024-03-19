@@ -7,10 +7,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ath0m/DistributedRaytracer/engine/camera"
-	clr "github.com/ath0m/DistributedRaytracer/engine/color"
-	"github.com/ath0m/DistributedRaytracer/engine/geometry"
-	"github.com/ath0m/DistributedRaytracer/engine/utils"
+	"github.com/ath0m/DistributedRaytracer/agent/engine/camera"
+	clr "github.com/ath0m/DistributedRaytracer/agent/engine/color"
+	"github.com/ath0m/DistributedRaytracer/agent/engine/geometry"
+	"github.com/ath0m/DistributedRaytracer/agent/engine/utils"
 )
 
 // Pixels represents the array of pixels (in packed RGB value) to Render and/or save
