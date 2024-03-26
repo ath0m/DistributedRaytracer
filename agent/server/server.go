@@ -10,11 +10,14 @@ import (
 	"github.com/ath0m/DistributedRaytracer/agent/engine"
 )
 
+var defaultWorld engine.World
+
 type RenderOptions struct {
-	Width        int   `json:"width"`        // width in pixel
-	Height       int   `json:"height"`       // height in pixel
-	RaysPerPixel int   `json:"raysperpixel"` // number of rays per pixel
-	Seed         int64 `json:"seed"`         // seed for random number generator
+	Width        int          `json:"width"`        // width in pixel
+	Height       int          `json:"height"`       // height in pixel
+	RaysPerPixel int          `json:"raysperpixel"` // number of rays per pixel
+	Seed         int64        `json:"seed"`         // seed for random number generator
+	World        engine.World `json:"world"`        // Optional world definition
 }
 
 func handleRender(w http.ResponseWriter, req *http.Request) {
@@ -23,6 +26,7 @@ func handleRender(w http.ResponseWriter, req *http.Request) {
 		Height:       400,
 		RaysPerPixel: 10,
 		Seed:         2024,
+		World:        defaultWorld,
 	}
 
 	err := json.NewDecoder(req.Body).Decode(&requestOptions)
@@ -31,14 +35,7 @@ func handleRender(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	world, err := engine.LoadWorld("assets/world.json")
-	if err != nil {
-		msg := fmt.Sprintf("Error while loading world [%v]", err)
-		http.Error(w, msg, http.StatusBadRequest)
-		return
-	}
-
-	scene := engine.NewScene(requestOptions.Width, requestOptions.Height, requestOptions.RaysPerPixel, world.Camera, world.Objects)
+	scene := engine.NewScene(requestOptions.Width, requestOptions.Height, requestOptions.RaysPerPixel, requestOptions.World.Camera, requestOptions.World.Objects)
 	pixels, completed := scene.Render(runtime.NumCPU())
 
 	<-completed
@@ -50,7 +47,28 @@ func handleRender(w http.ResponseWriter, req *http.Request) {
 	png.Encode(w, img)
 }
 
+func loadDefaultWorld() error {
+	loaded, err := engine.LoadWorld("assets/world.json")
+	if err != nil {
+		return err
+	} else {
+		defaultWorld = *loaded
+		return nil
+	}
+}
+
 func Start() {
+	err := loadDefaultWorld()
+	if err != nil {
+		panic(err)
+	}
+
 	http.HandleFunc("POST /render", handleRender)
-	http.ListenAndServe(":8090", nil)
+
+	fmt.Println("Server is starting on port 8090.")
+	err = http.ListenAndServe(":8090", nil)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("Server closed.")
 }
