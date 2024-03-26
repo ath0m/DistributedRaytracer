@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>JSON Editor and Three.js Sketch</title>
+  <meta charset="utf-8">
+
+  <style>
+    #container {
+      display: flex;
+      height: 100vh;
+    }
+
+    #json-editor {
+      flex: 1;
+      padding: 0px;
+      background-color: #f1f1f1;
+    }
+
+    #threejs-sketch {
+      flex: 2;
+      background-color: #ddd;
+    }
+  </style>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/10.0.2/jsoneditor.css" rel="stylesheet" type="text/css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/10.0.2/jsoneditor.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.min.js"></script>
+</head>
+
+<body>
+  <div id="container">
+    <div id="json-editor">
+      <!-- JSON editor content goes here -->
+    </div>
+    <div id="threejs-sketch">
+      <!-- Three.js sketch content goes here -->
+    </div>
+  </div>
+
+  <script>
+    // Create a JSON editor
+    const container = document.getElementById('json-editor');
+
+    // set json
+    const initialJson = {
+      "dx": 0.05,
+      "dy": 0.05,
+    }
+
+    let timeoutId;
+    function delayedOnChange() {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        const json = editor.get();
+        defaultCubeOptions.dx = json.dx || initialJson.dx;
+        defaultCubeOptions.dy = json.dy || initialJson.dy;
+      }, 500); // Specify the delay time in milliseconds (e.g., 500ms)
+    }
+
+    const options = {
+      modes: ['tree', 'code'],
+      onChange: delayedOnChange,
+    };
+    const editor = new JSONEditor(container, options);
+    editor.set(initialJson)
+  </script>
+
+  <script>
+    // Create a scene
+    const scene = new THREE.Scene();
+
+    // Create a camera
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.z = 5;
+
+    // Create a renderer
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth * 2 / 3, window.innerHeight);
+    document.getElementById('threejs-sketch').appendChild(renderer.domElement);
+
+    // Default cube options
+    const defaultCubeOptions = {
+      dx: 0.05,
+      dy: 0.05,
+    }
+
+    // Create a geometry
+    const geometry = new THREE.BoxGeometry();
+    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+    const cube = new THREE.Mesh(geometry, material);
+    scene.add(cube);
+
+    // Animation loop
+    function animate() {
+      requestAnimationFrame(animate);
+      cube.rotation.x += defaultCubeOptions.dx;
+      cube.rotation.y += defaultCubeOptions.dy;
+      renderer.render(scene, camera);
+    }
+    animate();
+  </script>
+</body>
+
+</html>
